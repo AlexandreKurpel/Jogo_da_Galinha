@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class CoyoteController extends GenericController {
 
     public CoyoteController() {
-        this.setTexture(Assets.manager.get(Assets.RAPOSO_TEXTURE));
+        this.setTexture(Assets.manager.get(Assets.RAPOSO_INVERTIDO_TEXTURE));
         this.setX(2);
         this.setY(20);
         this.setWidth(180);
@@ -16,8 +16,10 @@ public class CoyoteController extends GenericController {
 
     public void update(float deltaTime, boolean pressA , boolean pressD) {
         if(pressA){
+            this.setTexture(Assets.manager.get(Assets.RAPOSO_TEXTURE));
             this.setX(this.getX() - this.getSpeed() * deltaTime);
         }else if(pressD){
+            this.setTexture(Assets.manager.get(Assets.RAPOSO_INVERTIDO_TEXTURE));
             this.setX(this.getX() + this.getSpeed() * deltaTime);
         }
 
