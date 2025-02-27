@@ -87,6 +87,7 @@ class GameScreen implements Screen {
             cobra.render(game.getBatch());
             drawBackground("Score: " + score, 10, Gdx.graphics.getHeight() - 10);
             drawBackground("Time: " + (int) timeRemaining, 10, Gdx.graphics.getHeight() - 40);
+            drawBackground("Vida: " + (3 - cobra.damageCount), 10, Gdx.graphics.getHeight() - 60);
         } else {
             drawBackground("Game Over!", Gdx.graphics.getWidth() / 2f - 70, Gdx.graphics.getHeight() / 2f + 20);
             drawBackground("Final Score: " + score, Gdx.graphics.getWidth() / 2f - 90, Gdx.graphics.getHeight() / 2f - 10);

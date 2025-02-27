@@ -21,7 +21,7 @@ public class CobraController extends GenericController {
     private boolean isDamaged;
     private boolean isDead;
     private float collisionTime;
-    private int damageCount;
+    public int damageCount;
     private Animation<TextureRegion> currentAnimation;
     private boolean deathAnimationStarted;
 
