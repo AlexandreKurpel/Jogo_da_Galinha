@@ -18,10 +18,12 @@ public class CobraController extends GenericController {
     private float elapsedTime;
     private boolean isMoving;
     private boolean isColliding;
+    private boolean isDamaged;
     private boolean isDead;
-    private float collisionTimeLeft;
+    private float collisionTime;
     private int damageCount;
     private Animation<TextureRegion> currentAnimation;
+    private boolean deathAnimationStarted;
 
     private static final int FRAME_COLS = 8;
     private static final int FRAME_ROWS = 5;
@@ -52,8 +54,8 @@ public class CobraController extends GenericController {
             idleFrames[i] = tempFrames[0][i];
             movingFrames[i] = tempFrames[1][i];
             collisionFrames[i] = tempFrames[2][i];
-            damageFrames[i] = tempFrames[3][i]; // Coluna 4 - Animação de dano
-            deathFrames[i] = tempFrames[4][i];  // Coluna 5 - Animação de morte
+            damageFrames[i] = tempFrames[3][i];
+            deathFrames[i] = tempFrames[4][i];
         }
 
         idleAnimation = new Animation<>(FRAME_DURATION, idleFrames);
@@ -67,38 +69,58 @@ public class CobraController extends GenericController {
         currentAnimation = idleAnimation;
         damageCount = 0;
         isDead = false;
+        deathAnimationStarted = false;
     }
 
     public void update(float deltaTime, boolean pressA, boolean pressD, boolean hasCollision, boolean hitByBomb) {
-        if (isDead) return; // Se morreu, não atualiza mais nada
+        if (isDead) {
+            if (deathAnimationStarted) {
+                elapsedTime += deltaTime;
+                TextureRegion currentFrame = currentAnimation.getKeyFrame(elapsedTime, false);
+                sprite.setRegion(currentFrame);
+                if (currentAnimation.isAnimationFinished(elapsedTime)) {
+                    return;
+                }
+            }
+            return;
+        }
 
         elapsedTime += deltaTime;
 
-        if (hitByBomb) {
+        if (hitByBomb && !isDamaged && !isColliding) {
             damageCount++;
-
             if (damageCount >= 3) {
                 isDead = true;
-                currentAnimation = deathAnimation; // Muda para animação de morte
+                currentAnimation = deathAnimation;
                 elapsedTime = 0;
+                deathAnimationStarted = true;
                 return;
             } else {
-                collisionTimeLeft = COLLISION_DURATION; // Iniciar tempo de colisão
-                isColliding = true;
-                currentAnimation = damageAnimation; // Muda para animação de dano
+                collisionTime = COLLISION_DURATION;
+                isDamaged = true;
+                currentAnimation = damageAnimation;
+                elapsedTime = 0;
             }
         }
 
-        if (collisionTimeLeft > 0) {
-            collisionTimeLeft -= deltaTime;
-            if (collisionTimeLeft <= 0) {
-                isColliding = false; // Colisão terminou
+        if (hasCollision && !isColliding && !isDamaged) {
+            collisionTime = COLLISION_DURATION;
+            isColliding = true;
+            currentAnimation = collisionAnimation;
+            elapsedTime = 0;
+        }
+
+        if (collisionTime > 0) {
+            collisionTime -= deltaTime;
+            if (collisionTime <= 0) {
+                isColliding = false;
+                isDamaged = false;
             }
         }
 
         isMoving = pressA || pressD;
 
-        if (!isColliding) {
+        if (!isColliding && !isDamaged) {
             if (isMoving) {
                 currentAnimation = movingAnimation;
             } else {

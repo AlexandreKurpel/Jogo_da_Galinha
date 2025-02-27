@@ -23,6 +23,8 @@ class GameScreen implements Screen {
     private static final float GAME_DURATION = 60f;
     private float timeRemaining;
     private boolean gameEnded;
+    private float deathTimer; // Adicionado para controlar o tempo de morte
+    private static final float DEATH_ANIMATION_DURATION = 1.6f; //Duração da animação de morte
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -48,6 +50,7 @@ class GameScreen implements Screen {
         score = 0;
         timeRemaining = GAME_DURATION;
         gameEnded = false;
+        deathTimer = 0f; // Inicializa o tempo de morte
     }
 
     private void spawnEgg() {
@@ -76,7 +79,7 @@ class GameScreen implements Screen {
         game.getBatch().begin();
         game.getBatch().draw((Texture) Assets.manager.get(Assets.BACKGROUND_TEXTURE), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        if (!gameEnded) {
+        if (!gameEnded || deathTimer > 0) { // Modificado para esperar a animação de morte
             for (ChickenController chicken : chickens) {
                 chicken.render(game.getBatch());
             }
@@ -129,7 +132,13 @@ class GameScreen implements Screen {
             cobra.update(delta, game.inputProcessor.keyAPress, game.inputProcessor.keyDPress, hasCollision, hitByBomb);
 
             if (cobra.isDead()) {
-                gameEnded = true;
+                if (deathTimer == 0f) {
+                    deathTimer = DEATH_ANIMATION_DURATION; // Inicia o tempo de morte
+                }
+                deathTimer -= delta; // Decrementa o tempo de morte
+                if (deathTimer <= 0) {
+                    gameEnded = true; // Jogo termina após a animação de morte
+                }
             }
 
             if (TimeUtils.nanoTime() - lastEggTime > 1_000_000_000) {
