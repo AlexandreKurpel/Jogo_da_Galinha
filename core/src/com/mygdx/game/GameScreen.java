@@ -105,7 +105,7 @@ class GameScreen implements Screen {
             for (ChickenController chicken : chickens) {
                 int cont = 0;
                 for (EggController egg : chicken.getEggs()) {
-                    egg.update(delta);
+                    egg.update(delta,false);
 
                     if (verificaColisao(egg, cobra)) {
                         chicken.getEggs().removeIndex(cont);

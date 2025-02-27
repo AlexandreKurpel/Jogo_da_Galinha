@@ -1,11 +1,23 @@
 package com.mygdx.game.controller;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.Gdx;
 import com.mygdx.game.Assets;
 
 public class ChickenController extends GenericController {
+
+    private Sprite sprite;
+    private Animation<TextureRegion> idleAnimation;
+    private Animation<TextureRegion> movingAnimation;
+    private float elapsedTime;
+    private Animation<TextureRegion> currentAnimation;
+    private static final int FRAME_COLS = 8;
+    private static final int FRAME_ROWS = 5;
+    private static final float FRAME_DURATION = 0.2f;
 
     private Array<EggController> eggs;
 
