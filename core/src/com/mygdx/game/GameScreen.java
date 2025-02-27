@@ -23,8 +23,8 @@ class GameScreen implements Screen {
     private static final float GAME_DURATION = 60f;
     private float timeRemaining;
     private boolean gameEnded;
-    private float deathTimer; // Adicionado para controlar o tempo de morte
-    private static final float DEATH_ANIMATION_DURATION = 1.6f; //Duração da animação de morte
+    private float deathTimer;
+    private static final float DEATH_ANIMATION_DURATION = 1.6f;
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -47,10 +47,11 @@ class GameScreen implements Screen {
         }
 
         font = new BitmapFont();
+        font.setColor(Color.WHITE); // Cor do texto
         score = 0;
         timeRemaining = GAME_DURATION;
         gameEnded = false;
-        deathTimer = 0f; // Inicializa o tempo de morte
+        deathTimer = 0f;
     }
 
     private void spawnEgg() {
@@ -79,23 +80,18 @@ class GameScreen implements Screen {
         game.getBatch().begin();
         game.getBatch().draw((Texture) Assets.manager.get(Assets.BACKGROUND_TEXTURE), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        if (!gameEnded || deathTimer > 0) { // Modificado para esperar a animação de morte
+        if (!gameEnded || deathTimer > 0) {
             for (ChickenController chicken : chickens) {
                 chicken.render(game.getBatch());
             }
 
             cobra.render(game.getBatch());
-            drawBackground("Score: " + score, 10, Gdx.graphics.getHeight() - 10);
-            drawBackground("Time: " + (int) timeRemaining, 10, Gdx.graphics.getHeight() - 40);
-            drawBackground("Vida: " + (3 - cobra.damageCount), 10, Gdx.graphics.getHeight() - 60);
-        } else {
-            drawBackground("Game Over!", Gdx.graphics.getWidth() / 2f - 70, Gdx.graphics.getHeight() / 2f + 20);
-            drawBackground("Final Score: " + score, Gdx.graphics.getWidth() / 2f - 90, Gdx.graphics.getHeight() / 2f - 10);
-            drawBackground("Press 'R' to Restart", Gdx.graphics.getWidth() / 2f - 110, Gdx.graphics.getHeight() / 2f - 40);
 
-            if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-                game.setScreen(new MenuScreen(game));
-            }
+            // Interface do jogo
+            drawInterface();
+
+        } else {
+            drawGameOverScreen();
         }
 
         game.getBatch().end();
@@ -134,11 +130,11 @@ class GameScreen implements Screen {
 
             if (cobra.isDead()) {
                 if (deathTimer == 0f) {
-                    deathTimer = DEATH_ANIMATION_DURATION; // Inicia o tempo de morte
+                    deathTimer = DEATH_ANIMATION_DURATION;
                 }
-                deathTimer -= delta; // Decrementa o tempo de morte
+                deathTimer -= delta;
                 if (deathTimer <= 0) {
-                    gameEnded = true; // Jogo termina após a animação de morte
+                    gameEnded = true;
                 }
             }
 
@@ -148,11 +144,64 @@ class GameScreen implements Screen {
         }
     }
 
+    private void drawInterface() {
+        int yOffset = Gdx.graphics.getHeight() - 20;
+        int xOffset = 20;
+
+        // Pontuação
+        drawBackground("Score: " + score, xOffset, yOffset);
+        yOffset -= 30;
+
+        // Tempo
+        drawBackground("Time: " + (int) timeRemaining, xOffset, yOffset);
+        yOffset -= 30;
+
+        // Vida
+        drawBackground("Vida: " + (3 - cobra.damageCount), xOffset, yOffset);
+    }
+
+    private void drawGameOverScreen() {
+        int centerX = Gdx.graphics.getWidth() / 2;
+        int centerY = Gdx.graphics.getHeight() / 2;
+
+        game.getBatch().setColor(Color.BLACK);
+        game.getBatch().draw((Texture) Assets.manager.get(Assets.BACKGROUND_TEXTURE), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        game.getBatch().setColor(Color.WHITE);
+
+        font.setColor(Color.WHITE);
+        font.getData().setScale(2); // Aumenta a escala da fonte
+
+        String gameOverMessage = "Game Over!";
+        String finalScoreMessage = "Final Score: " + score;
+        String restartMessage = "Press 'R' to Restart";
+
+        // Mensagens personalizadas
+        if (score >= 20) {
+            gameOverMessage = "Congratulations!";
+            finalScoreMessage = "You Scored: " + score;
+        } else if (score <= 5) {
+            gameOverMessage = "Try Again!";
+        }
+
+        float gameOverWidth = font.getData().getGlyph(' ').width * gameOverMessage.length();
+        float finalScoreWidth = font.getData().getGlyph(' ').width * finalScoreMessage.length();
+        float restartWidth = font.getData().getGlyph(' ').width * restartMessage.length();
+
+        font.draw(game.getBatch(), gameOverMessage, centerX - gameOverWidth / 2, centerY + 50);
+        font.draw(game.getBatch(), finalScoreMessage, centerX - finalScoreWidth / 2, centerY);
+        font.draw(game.getBatch(), restartMessage, centerX - restartWidth / 2, centerY - 50);
+
+//        font.getData().setScale(1); // Restaura a escala da fonte
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            game.setScreen(new MenuScreen(game));
+        }
+    }
+
     private void drawBackground(String text, float x, float y) {
         game.getBatch().setColor(Color.BLACK);
-        game.getBatch().draw((Texture) Assets.manager.get(Assets.BACKGROUND_TEXTURE), x - 5, y - 20, 200, 25);
+        game.getBatch().draw((Texture) Assets.manager.get(Assets.BACKGROUND_TEXTURE), x - 5, y - 20, 150, 25);
         game.getBatch().setColor(Color.WHITE);
-        font.setColor(Color.WHITE);
         font.draw(game.getBatch(), text, x, y);
     }
 
