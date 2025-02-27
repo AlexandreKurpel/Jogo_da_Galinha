@@ -1,29 +1,26 @@
 package com.mygdx.game;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-
+import com.mygdx.game.controller.ChickenController;
+import com.mygdx.game.controller.CobraController;
+import com.mygdx.game.controller.EggController;
 
 class GameScreen implements Screen {
-
     private final MyGdxGame game;
-
-    private CoyoteController coyote;
+    private CobraController cobra;
     private Array<ChickenController> chickens;
     private long lastEggTime;
     private BitmapFont font;
     private int score;
-    private static final float GAME_DURATION = 60f; // 60 segundos
+    private static final float GAME_DURATION = 60f;
     private float timeRemaining;
     private boolean gameEnded;
 
@@ -37,14 +34,13 @@ class GameScreen implements Screen {
         Assets.manager.finishLoading();
         Assets.showMusic();
 
-
-
-        coyote = new CoyoteController();
+        cobra = new CobraController();
         chickens = new Array<>();
 
         for (int i = 0; i < 4; i++) {
             ChickenController chicken = new ChickenController();
-            chicken.setX(i * 150 + 50);
+            float aux = (i % 4f) * (Gdx.graphics.getWidth() / 4f) + ((Gdx.graphics.getWidth() / 4f) / 2f);
+            chicken.setX(aux);
             chickens.add(chicken);
         }
 
@@ -62,7 +58,6 @@ class GameScreen implements Screen {
 
     @Override
     public void show() {
-        //AO CHAMAR A TELA VOLTA A RENDERIZAR AUTOMATICO
         Gdx.graphics.setContinuousRendering(true);
     }
 
@@ -71,7 +66,7 @@ class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         if (!gameEnded) {
-            timeRemaining -= Gdx.graphics.getDeltaTime();
+            timeRemaining -= delta;
             if (timeRemaining <= 0) {
                 gameEnded = true;
                 timeRemaining = 0;
@@ -86,14 +81,13 @@ class GameScreen implements Screen {
                 chicken.render(game.getBatch());
             }
 
-            coyote.render(game.getBatch());
-
-            drawTextWithBackground("Score: " + score, 10, Gdx.graphics.getHeight() - 10);
-            drawTextWithBackground("Time: " + (int) timeRemaining, 10, Gdx.graphics.getHeight() - 40);
+            cobra.render(game.getBatch());
+            drawBackground("Score: " + score, 10, Gdx.graphics.getHeight() - 10);
+            drawBackground("Time: " + (int) timeRemaining, 10, Gdx.graphics.getHeight() - 40);
         } else {
-            drawTextWithBackground("Game Over!", Gdx.graphics.getWidth() / 2f - 70, Gdx.graphics.getHeight() / 2f + 20);
-            drawTextWithBackground("Final Score: " + score, Gdx.graphics.getWidth() / 2f - 90, Gdx.graphics.getHeight() / 2f - 10);
-            drawTextWithBackground("Press 'R' to Restart", Gdx.graphics.getWidth() / 2f - 110, Gdx.graphics.getHeight() / 2f - 40);
+            drawBackground("Game Over!", Gdx.graphics.getWidth() / 2f - 70, Gdx.graphics.getHeight() / 2f + 20);
+            drawBackground("Final Score: " + score, Gdx.graphics.getWidth() / 2f - 90, Gdx.graphics.getHeight() / 2f - 10);
+            drawBackground("Press 'R' to Restart", Gdx.graphics.getWidth() / 2f - 110, Gdx.graphics.getHeight() / 2f - 40);
 
             if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
                 game.setScreen(new MenuScreen(game));
@@ -103,17 +97,26 @@ class GameScreen implements Screen {
         game.getBatch().end();
 
         if (!gameEnded) {
-            coyote.update(Gdx.graphics.getDeltaTime(), game.inputProcessor.keyAPress, game.inputProcessor.keyDPress);
+            boolean hasCollision = false;
+            boolean hitByBomb = false;
+
+            cobra.update(delta, game.inputProcessor.keyAPress, game.inputProcessor.keyDPress, false, false);
 
             for (ChickenController chicken : chickens) {
                 int cont = 0;
                 for (EggController egg : chicken.getEggs()) {
-                    egg.update(Gdx.graphics.getDeltaTime());
+                    egg.update(delta);
 
-                    if (verificaColisao(egg, coyote)) {
+                    if (verificaColisao(egg, cobra)) {
                         chicken.getEggs().removeIndex(cont);
-                        score++;
                         egg.getEggCatchSound().play();
+
+                        if (egg.getBomb()) {
+                            hitByBomb = true;
+                        } else {
+                            score++;
+                            hasCollision = true;
+                        }
                     }
 
                     if (egg.isOutOfBounds()) {
@@ -123,13 +126,19 @@ class GameScreen implements Screen {
                 }
             }
 
+            cobra.update(delta, game.inputProcessor.keyAPress, game.inputProcessor.keyDPress, hasCollision, hitByBomb);
+
+            if (cobra.isDead()) {
+                gameEnded = true;
+            }
+
             if (TimeUtils.nanoTime() - lastEggTime > 1_000_000_000) {
                 spawnEgg();
             }
         }
     }
 
-    private void drawTextWithBackground(String text, float x, float y) {
+    private void drawBackground(String text, float x, float y) {
         game.getBatch().setColor(Color.BLACK);
         game.getBatch().draw((Texture) Assets.manager.get(Assets.BACKGROUND_TEXTURE), x - 5, y - 20, 200, 25);
         game.getBatch().setColor(Color.WHITE);
@@ -138,20 +147,13 @@ class GameScreen implements Screen {
     }
 
     @Override
-    public void resize(int width, int height) {
-    }
-
+    public void resize(int width, int height) {}
     @Override
-    public void pause() {
-    }
-
+    public void pause() {}
     @Override
-    public void resume() {
-    }
-
+    public void resume() {}
     @Override
-    public void hide() {
-    }
+    public void hide() {}
 
     @Override
     public void dispose() {

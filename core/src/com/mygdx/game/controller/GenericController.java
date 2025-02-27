@@ -1,13 +1,17 @@
-package com.mygdx.game;
+package com.mygdx.game.controller;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.mygdx.game.Colisao;
 
 public abstract class GenericController implements Colisao {
     private Texture texture;
-    //todo: ajustar a altura e largura para dimensionar o sprit
     private float height, width, x, y, speed;
+
+
 
 //    private Rectangle rectangle;
 
@@ -76,4 +80,10 @@ public abstract class GenericController implements Colisao {
     public float getWidth() {
         return width;
     }
+
+    public boolean isColid() {
+        return true;
+    }
+
+
 }

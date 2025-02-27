@@ -1,9 +1,9 @@
-package com.mygdx.game;
+package com.mygdx.game.controller;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.Gdx;
+import com.mygdx.game.Assets;
 
 public class ChickenController extends GenericController {
 
@@ -11,25 +11,16 @@ public class ChickenController extends GenericController {
 
     public ChickenController() {
         this.setTexture(Assets.manager.get(Assets.GALINHA_TEXTURE));
-        this.setY(Gdx.graphics.getHeight() - 100);
-        this.setHeight(64);
-        this.setWidth(64);
+        this.setY(Gdx.graphics.getHeight() - ((Gdx.graphics.getHeight() / 11f) * 2f));
+        this.setHeight(Gdx.graphics.getHeight() / 11f);
+        this.setWidth(Gdx.graphics.getHeight() / 11f);
         eggs = new Array<>();
+
     }
 
     public void shoot() {
-        eggs.add(new EggController(this.getX(), this.getY()));
+        eggs.add(new EggController(this.getX() + (getWidth() / 2f), this.getY()));
     }
-
-//    public void update(float deltaTime) {
-//        for (EggController egg : eggs) {
-//            egg.setX(egg.getX() + 300 * deltaTime);
-//
-//            if (egg.getX() > Gdx.graphics.getWidth()) {
-//                eggs.removeValue(egg, true);
-//            }
-//        }
-//    }
 
     public void render(SpriteBatch batch) {
 
@@ -38,6 +29,7 @@ public class ChickenController extends GenericController {
         for (EggController egg : this.getEggs()) {
             egg.render(batch);
         }
+
     }
 
     public Array<EggController> getEggs() {
@@ -53,6 +45,7 @@ public class ChickenController extends GenericController {
         for (EggController egg : this.getEggs()) {
             egg.dispose();
         }
+
         super.dispose();
     }
 }
