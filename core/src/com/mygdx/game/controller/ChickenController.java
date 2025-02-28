@@ -20,8 +20,11 @@ public class ChickenController extends GenericController {
     private static final float FRAME_DURATION = 0.2f;
 
     private Array<EggController> eggs;
+    private int dificuldade = 0;
 
-    public ChickenController() {
+
+    public ChickenController(int dificuldade) {
+        this.dificuldade = dificuldade;
         this.setTexture(Assets.manager.get(Assets.GALINHA_TEXTURE));
         this.setY(Gdx.graphics.getHeight() - ((Gdx.graphics.getHeight() / 11f) * 2f));
         this.setHeight(Gdx.graphics.getHeight() / 11f);
@@ -31,7 +34,7 @@ public class ChickenController extends GenericController {
     }
 
     public void shoot() {
-        eggs.add(new EggController(this.getX() + (getWidth() / 2f), this.getY()));
+        eggs.add(new EggController(this.getX() + (getWidth() / 2f), this.getY(), dificuldade));
     }
 
     public void render(SpriteBatch batch) {

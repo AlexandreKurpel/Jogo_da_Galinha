@@ -25,10 +25,36 @@ class GameScreen implements Screen {
     private boolean gameEnded;
     private float deathTimer;
     private static final float DEATH_ANIMATION_DURATION = 1.6f;
+    private int dificuldade = 0;
+    private int vidas;
+    private float velocidade;
 
-    public GameScreen(MyGdxGame game) {
+    public GameScreen(MyGdxGame game, int dificuldade) {
+        setDificuldade(dificuldade);
         this.game = game;
         initialize();
+    }
+
+    //Função para pegar a dificuldade, quantidade de vidas e velocidade
+    private void setDificuldade(int dificuldade) {
+        switch (dificuldade) {
+            case 0:
+                vidas = 5; // facil
+                velocidade = Gdx.graphics.getWidth() / 3f;
+                break;
+            case 1:
+                vidas = 3; // medio
+                velocidade = Gdx.graphics.getWidth() / 4f;
+                break;
+            case 2:
+                vidas = 1; // dificil
+                velocidade = Gdx.graphics.getWidth() / 5.5f;
+                break;
+            default:
+                vidas = 3; // medio
+                velocidade = Gdx.graphics.getWidth() / 4f;
+                break;
+        }
     }
 
     private void initialize() {
@@ -36,11 +62,11 @@ class GameScreen implements Screen {
         Assets.manager.finishLoading();
         Assets.showMusic();
 
-        cobra = new CobraController();
+        cobra = new CobraController(velocidade, vidas);
         chickens = new Array<>();
 
         for (int i = 0; i < 4; i++) {
-            ChickenController chicken = new ChickenController();
+            ChickenController chicken = new ChickenController(dificuldade);
             float aux = (i % 4f) * (Gdx.graphics.getWidth() / 4f) + ((Gdx.graphics.getWidth() / 4f) / 2f);
             chicken.setX(aux);
             chickens.add(chicken);
@@ -157,7 +183,7 @@ class GameScreen implements Screen {
         yOffset -= 30;
 
         // Vida
-        drawBackground("Vida: " + (3 - cobra.damageCount), xOffset, yOffset);
+        drawBackground("Vida: " + (vidas - cobra.damageCount), xOffset, yOffset);
     }
 
     private void drawGameOverScreen() {

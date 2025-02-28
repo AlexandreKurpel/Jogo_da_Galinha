@@ -28,11 +28,19 @@ public class EggController extends GenericController {
     private Sound eggCatchSound;
     private Boolean bomb = false;
 
-    public EggController(float x, float y) {
+    public EggController(float x, float y, int dificuldade) {
         this.setX(x);
         this.setY(y);
-        //         20% de chance de ser uma bomba
-        bomb = MathUtils.random() < 0.2f;
+
+        // geracao de bombas conformde dificuldade
+        if (dificuldade == 0) { // facil
+            bomb = MathUtils.random() < 0.1f;
+        } else if (dificuldade == 1) { // medio
+            bomb = MathUtils.random() < 0.3f;
+        } else { // dificil
+            bomb = MathUtils.random() < 0.5f;
+        }
+
 
         if (bomb) {
             this.setTexture(Assets.manager.get(Assets.BOMBASPRITE));

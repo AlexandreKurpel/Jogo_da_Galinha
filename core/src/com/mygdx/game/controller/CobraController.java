@@ -29,15 +29,17 @@ public class CobraController extends GenericController {
     private static final int FRAME_ROWS = 5;
     private static final float FRAME_DURATION = 0.2f;
     private static final float COLLISION_DURATION = 1.0f;
+    private int vidas = 3;
 
-    public CobraController() {
+    public CobraController(float velocidade, int vidas) {
+        this.vidas = vidas;
         this.setX(2);
         this.setY(20);
         this.setTexture(Assets.manager.get(Assets.SPRITCOBRA));
         sprite = new Sprite(this.getTexture(), 0, 0, 25, 25);
         sprite.setPosition(0, 10);
         sprite.setSize(Gdx.graphics.getHeight() / 5f, Gdx.graphics.getHeight() / 5f);
-        this.setSpeed(Gdx.graphics.getWidth() / 4f);
+        this.setSpeed(velocidade);
 
         TextureRegion[][] tempFrames = TextureRegion.split(
                 this.getTexture(), this.getTexture().getWidth() / FRAME_COLS,
@@ -89,7 +91,7 @@ public class CobraController extends GenericController {
 
         if (hitByBomb && !isDamaged && !isColliding) {
             damageCount++;
-            if (damageCount >= 3) {
+            if (damageCount >= vidas) {
                 isDead = true;
                 currentAnimation = deathAnimation;
                 elapsedTime = 0;
