@@ -182,7 +182,7 @@ class GameScreen implements Screen {
         drawBackground("Time: " + (int) timeRemaining, xOffset, yOffset);
         yOffset -= 30;
 
-        // Vida
+        // Vidas
         drawBackground("Vida: " + (vidas - cobra.damageCount), xOffset, yOffset);
     }
 
